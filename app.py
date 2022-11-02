@@ -2,7 +2,6 @@
 import streamlit as st
 import numpy as  np
 import sklearn as svm
-import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -53,6 +52,3 @@ df_final = pd.concat([df_Iris, df_choix_utilisateur], axis=0)
 if st.button('Validé'):
     st.success('Bien joue')
     st.write('Felicitation')
-
-
-
