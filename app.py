@@ -1,54 +1,56 @@
-# On import les librairie
-import streamlit as st
+#Import des differents modules necessaires
 import numpy as  np
-import sklearn as svm
+import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
+from streamlit.elements.button import ButtonSerde
+import streamlit as st
 
-#on recupere le csv
+# Lecture du fichier
 df_Iris = pd.read_csv('iris.csv')
 
-#
+# entrainement par les donnees
+knn = KNeighborsClassifier(n_neighbors=5)
 X = df_Iris.drop("species", axis=1)
 y = df_Iris["species"]
-knn = KNeighborsClassifier(n_neighbors=5)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=22)
+sns.pairplot(df_Iris, hue = 'species')
+sns.set_theme(style="ticks")
 knn.fit(X_train, y_train)
-sns.pairplot (df_Iris, hue= "species")
-sns.set_theme()
 
+# Titre de mon fichier
+st.title('Quel iris suis-je')
+st.subheader('Choisissez vos parametres !')
 
-# Ajout un titre 
-st.title('Iris ')
+# Sliders min - max
+longueur_sepale = st.sidebar.slider("Choisissez la longueur de la sépale", 4.0, 8.0)
+largeur_sepale = st.sidebar.slider("Choisissez la largeur de la sépale", 2.0, 5.0)
+longueur_petale = st.sidebar.slider("Choisissez la longueur de la pétale", 1.0, 8.0)
+largeur_petale = st.sidebar.slider("Choisissez la largeur de la pétale", 0.0, 3.0)
 
-# 
-st.subheader ('Quelle parametre choisissez vous ?')
+# Especes de l'utilisateur
+data_utilisateur = [longueur_sepale, largeur_sepale, longueur_petale, largeur_petale]
+espece_utilisateur = knn.predict([data_utilisateur])
 
-# Sliders 
-sp_length = st.slider('sepal_length', min_value=4.00, max_value=10.00)
-sp_width  = st.slider('sepal_width', min_value=2.00, max_value=5.00)
-sp_length = st.slider('petal_length', min_value=1.00, max_value=8.00)
-sp_width  = st.slider('petal_width', min_value=0.00, max_value=2.50)
-
-
-#
+# choix utilisateur avec utilisation de dicotionnaire et graphique
 point_en_cours = {
-        'sepal_length':  [sp_length],
-        "sepal_width" :  [sp_width],
-        "petal_length" : [sp_length],
-        "petal_width":   [sp_width ],
-        "species": "unknown"
+        'sepal_length': [longueur_sepale],
+        "sepal_width" : [largeur_sepale],
+        "petal_length" : [longueur_petale],
+        "petal_width": [largeur_petale],
+        "species": "Votre point"
         }
 
 
-#choix 
 df_choix_utilisateur = pd.DataFrame(point_en_cours)
 df_final = pd.concat([df_Iris, df_choix_utilisateur], axis=0)
 
-
-# Ajout du bouton "Validé" 
-if st.button('Validé'):
-    st.success('Bien joue')
-    st.write('Felicitation')
+# Affichage du bouton Validé
+if st.button("Validé"):
+    st.success("Félicitation " + espece_utilisateur[0])
+    st.pyplot(sns.pairplot(df_final, x_vars=["petal_length"], y_vars=["petal_width"], hue="species", markers=["o", "s", "D", "p"]))
+    st.pyplot(sns.pairplot(df_final, x_vars=["sepal_length"], y_vars=["sepal_width"], hue="species", markers=["o", "s", "D", "p"]))
+    st.write('Bravo')
+    st.write('')
